@@ -21,11 +21,6 @@ public class BoletaPDFGenerator {
             PdfWriter.getInstance(doc, new FileOutputStream(ruta));
             doc.open();
 
-            // ----------------------------------------------------------
-            // Aquí puedes agregar el LOGO de la empresa (en formato PNG)
-            // ----------------------------------------------------------
-
-            // ENCABEZADO EMPRESA
             Paragraph empresa = new Paragraph("EMPRESA DE TRANSPORTES SOFTFKES S.A.", FONT_BOLD);
             empresa.setAlignment(Element.ALIGN_CENTER);
             doc.add(empresa);
