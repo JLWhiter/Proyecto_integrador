@@ -42,7 +42,7 @@ public class BoletaPDFGenerator {
             titulo.setAlignment(Element.ALIGN_CENTER);
             doc.add(titulo);
 
-            doc.add(new Paragraph("BOL-" + String.format("%06d", boleta.getIdBoleta()), FONT_NORMAL));
+            doc.add(new Paragraph(boleta.getNumeroDocumento(), FONT_NORMAL));
             doc.add(Chunk.NEWLINE);
 
             // FECHA Y CLIENTE
