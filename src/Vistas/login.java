@@ -1,51 +1,115 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package Vistas;
 
+import Config.Conexion;
 import ModeloDTO.ClienteDTO;
-import java.awt.Color;
-import java.awt.Image;
+import Vistas_administrativas.MenuAdmin;
+import java.awt.*;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.WindowConstants;
-import Modelo.Login;
-import Config.Conexion;
+import javax.swing.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-
-/**
- *
- * @author joseb
- */
-public class login extends javax.swing.JFrame {
-
-    /**
-     * Creates new form login
-     */
+public class login extends JFrame {
     private static final int MAX_INTENTOS = 3;
-    private static final long BLOQUEO_MS = 15_000;
+    private static final long BLOQUEO_MS = 15000;
     private final Map<String, Integer> intentosFallidos = new HashMap<>();
     private final Map<String, Long> finBloqueo = new HashMap<>();
 
+    private JTextField Usuario;
+    private JPasswordField Contraseña;
+    private JButton btnLogin, btnRegistro;
+
     public login() {
         initComponents();
-        this.getContentPane().setBackground(Color.pink);
-        SetImageLabel(jLabel4, "src/Resources/logo_GROUP SOFTPLEX.png");
     }
 
-    private void configurarVentana() {
-        setTitle("Sistema de Login");
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setResizable(false);
+    private void initComponents() {
+        VistaTheme.prepararFrame(this, "Iniciar sesión", 880, 560);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JPanel root = VistaTheme.fondo();
+        root.setLayout(new GridBagLayout());
+
+        JPanel card = VistaTheme.card();
+        card.setPreferredSize(new Dimension(760, 420));
+        card.setLayout(new GridLayout(1, 2, 0, 0));
+
+        JPanel lado = new JPanel(new GridBagLayout());
+        lado.setBackground(new Color(255, 230, 242));
+        lado.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        GridBagConstraints l = new GridBagConstraints();
+        l.gridx = 0; l.gridy = 0; l.insets = new Insets(5,5,20,5);
+        lado.add(VistaTheme.logo(), l);
+        l.gridy++;
+        JLabel bien = VistaTheme.titulo("Bienvenido");
+        lado.add(bien, l);
+        l.gridy++;
+        JLabel frase = VistaTheme.subtitulo("Sistema de ventas y comprobantes");
+        lado.add(frase, l);
+        l.gridy++;
+        JLabel deco = new JLabel("Compra fácil, rápido y ordenado");
+        deco.setFont(VistaTheme.bold(15));
+        deco.setForeground(VistaTheme.MORADO);
+        lado.add(deco, l);
+
+        JPanel form = new JPanel(new GridBagLayout());
+        form.setBackground(Color.WHITE);
+        form.setBorder(BorderFactory.createEmptyBorder(35, 42, 35, 42));
+        GridBagConstraints g = new GridBagConstraints();
+        g.gridx = 0; g.gridy = 0; g.gridwidth = 2; g.anchor = GridBagConstraints.WEST; g.insets = new Insets(0,0,8,0);
+        form.add(VistaTheme.titulo("Iniciar sesión"), g);
+        g.gridy++; g.insets = new Insets(0,0,25,0);
+        form.add(VistaTheme.subtitulo("Ingresa tu usuario y contraseña"), g);
+
+        Usuario = VistaTheme.campo();
+        Contraseña = VistaTheme.password();
+        btnLogin = VistaTheme.boton("Ingresar");
+        btnRegistro = VistaTheme.botonSecundario("Crear cuenta");
+
+        g.gridwidth = 1;
+        g.fill = GridBagConstraints.NONE;
+        g.weightx = 0;
+        g.gridx = 0;
+        g.gridy++;
+        g.insets = new Insets(8, 0, 6, 18);
+        form.add(VistaTheme.etiqueta("Usuario"), g);
+
+        g.gridx = 1;
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.weightx = 1;
+        g.insets = new Insets(8, 0, 6, 0);
+        form.add(Usuario, g);
+
+        g.gridx = 0;
+        g.gridy++;
+        g.fill = GridBagConstraints.NONE;
+        g.weightx = 0;
+        g.insets = new Insets(8, 0, 6, 18);
+        form.add(VistaTheme.etiqueta("Contraseña"), g);
+
+        g.gridx = 1;
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.weightx = 1;
+        g.insets = new Insets(8, 0, 6, 0);
+        form.add(Contraseña, g);
+
+        g.gridx = 0;
+        g.gridy++;
+        g.gridwidth = 2;
+        g.fill = GridBagConstraints.HORIZONTAL;
+        g.weightx = 1;
+        g.insets = new Insets(28, 0, 0, 0);
+        form.add(btnLogin, g);
+
+        g.gridy++;
+        g.insets = new Insets(12, 0, 0, 0);
+        form.add(btnRegistro, g);
+
+        btnLogin.addActionListener(e -> iniciarSesion());
+        btnRegistro.addActionListener(e -> { new Register().setVisible(true); dispose(); });
+        Contraseña.addActionListener(e -> iniciarSesion());
+
+        card.add(lado); card.add(form); root.add(card);
+        setContentPane(root);
     }
 
     private void limpiarCampos() {
@@ -54,136 +118,12 @@ public class login extends javax.swing.JFrame {
         Usuario.requestFocus();
     }
 
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        jToggleButton1 = new javax.swing.JToggleButton();
-        jButton1 = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jSeparator1 = new javax.swing.JSeparator();
-        Contraseña = new javax.swing.JPasswordField();
-        Usuario = new javax.swing.JTextField();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        jToggleButton1.setFont(new java.awt.Font("Serif", 0, 14)); // NOI18N
-        jToggleButton1.setText("Iniciar Sesion");
-        jToggleButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jToggleButton1ActionPerformed(evt);
-            }
-        });
-
-        jButton1.setFont(new java.awt.Font("Serif", 0, 14)); // NOI18N
-        jButton1.setText("Registro");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
-        jLabel1.setFont(new java.awt.Font("Serif", 0, 18)); // NOI18N
-        jLabel1.setText("Usuario");
-
-        jLabel2.setFont(new java.awt.Font("Serif", 0, 18)); // NOI18N
-        jLabel2.setText("Contraseña");
-
-        jLabel3.setFont(new java.awt.Font("Serif", 1, 18)); // NOI18N
-        jLabel3.setForeground(new java.awt.Color(51, 102, 255));
-        jLabel3.setText("INICIAR SESION");
-
-        jLabel4.setFont(new java.awt.Font("Serif", 0, 18)); // NOI18N
-
-        jSeparator1.setForeground(new java.awt.Color(51, 102, 255));
-
-        Contraseña.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ContraseñaActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(38, 38, 38)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jButton1)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel2)
-                                .addComponent(jLabel1)))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jToggleButton1))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(55, 55, 55)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(Contraseña)
-                                    .addComponent(Usuario, javax.swing.GroupLayout.DEFAULT_SIZE, 169, Short.MAX_VALUE))
-                                .addGap(0, 0, Short.MAX_VALUE))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(14, 14, 14)
-                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(53, 53, 53)
-                        .addComponent(jLabel3)
-                        .addGap(0, 141, Short.MAX_VALUE)))
-                .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(128, 128, 128))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(52, 52, 52)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(Usuario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(28, 28, 28)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(Contraseña, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 58, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jToggleButton1)
-                    .addComponent(jButton1))
-                .addGap(23, 23, 23))
-        );
-
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-    private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
-
+    private void iniciarSesion() {
         String usuario = Usuario.getText().trim();
-        char[] passArray = Contraseña.getPassword();
-        String contraseña = new String(passArray).trim();
+        String contraseña = new String(Contraseña.getPassword()).trim();
 
         if (usuario.isEmpty() || contraseña.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Por favor ingrese su usuario y contraseña",
-                    "Campos vacíos",
-                    JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Por favor ingrese su usuario y contraseña", "Campos vacíos", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -192,151 +132,79 @@ public class login extends javax.swing.JFrame {
 
         if (bloqueoHasta != null && ahora < bloqueoHasta) {
             long segRestantes = (bloqueoHasta - ahora) / 1000;
-            JOptionPane.showMessageDialog(this,
-                    "Usuario bloqueado. Intente de nuevo en " + segRestantes + " s.",
-                    "Bloqueo temporal",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Usuario bloqueado. Intente de nuevo en " + segRestantes + " s.", "Bloqueo temporal", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        try {
+        String sql = """
+            SELECT
+                p.id_persona,
+                p.nombre,
+                p.apellido,
+                p.correo,
+                p.telefono,
+                CASE
+                    WHEN c.id_cliente IS NULL THEN 'ADMIN'
+                    ELSE 'CLIENTE'
+                END AS tipo_usuario
+            FROM usuario u
+            INNER JOIN persona p ON u.id_persona = p.id_persona
+            LEFT JOIN cliente c ON LOWER(TRIM(c.correo)) = LOWER(TRIM(p.correo))
+            WHERE TRIM(u.usuario) = ?
+            AND u.contrasena = ?
+        """;
 
-            Conexion cn = new Conexion();
-
-            Connection con = cn.getConexion();
-
-            String sql = """
-        SELECT
-            p.id_persona,
-            p.nombre,
-            p.apellido,
-            p.correo,
-            p.telefono
-        FROM usuario u
-        INNER JOIN persona p
-            ON u.id_persona = p.id_persona
-        WHERE u.usuario = ?
-        AND u.contrasena = ?
-    """;
-
-            PreparedStatement ps = con.prepareStatement(sql);
-
+        try (Connection con = new Conexion().getConexion(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, usuario);
             ps.setString(2, contraseña);
 
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-
                 intentosFallidos.remove(usuario);
                 finBloqueo.remove(usuario);
 
-                ClienteDTO cliente = new ClienteDTO();
+                String tipoUsuario = rs.getString("tipo_usuario");
+                String nombreCompleto = rs.getString("nombre") + " " + rs.getString("apellido");
 
+                if ("ADMIN".equals(tipoUsuario)) {
+                    JOptionPane.showMessageDialog(this, "Bienvenido administrador " + rs.getString("nombre"));
+                    new MenuAdmin(nombreCompleto).setVisible(true);
+                    dispose();
+                    return;
+                }
+
+                ClienteDTO cliente = new ClienteDTO();
                 cliente.setIdCliente(rs.getString("id_persona"));
                 cliente.setNombre(rs.getString("nombre"));
                 cliente.setApellido(rs.getString("apellido"));
                 cliente.setCorreo(rs.getString("correo"));
                 cliente.setTelefono(rs.getString("telefono"));
 
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Bienvenido " + cliente.getNombre()
-                );
-
-                Menu menu = new Menu(cliente);
-
-                menu.setVisible(true);
-
-                this.dispose();
-
+                JOptionPane.showMessageDialog(this, "Bienvenido " + cliente.getNombre());
+                new Menu(cliente).setVisible(true);
+                dispose();
                 return;
             }
 
             intentosFallidos.merge(usuario, 1, Integer::sum);
-
             int intentos = intentosFallidos.get(usuario);
 
             if (intentos >= MAX_INTENTOS) {
-
                 finBloqueo.put(usuario, ahora + BLOQUEO_MS);
-
                 intentosFallidos.put(usuario, 0);
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Usuario bloqueado por 15 segundos"
-                );
-
+                JOptionPane.showMessageDialog(this, "Usuario bloqueado por 15 segundos");
             } else {
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Usuario o contraseña incorrectos"
-                );
+                JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
             }
 
             limpiarCampos();
-
         } catch (Exception e) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Error: " + e.getMessage()
-            );
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
         }
-
-        limpiarCampos();
-
-    }//GEN-LAST:event_jToggleButton1ActionPerformed
-
-    private void ContraseñaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ContraseñaActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_ContraseñaActionPerformed
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        Register registro = new Register();
-        registro.setVisible(true);
-        this.dispose();
-    }//GEN-LAST:event_jButton1ActionPerformed
-
-    private void SetImageLabel(JLabel labelName, String root) {
-        ImageIcon image = new ImageIcon(root);
-        Icon icon = new ImageIcon(
-                image.getImage().getScaledInstance(
-                        labelName.getWidth(),
-                        labelName.getHeight(),
-                        Image.SCALE_SMOOTH // mejor calidad que SCALE_DEFAULT
-                )
-        );
-        labelName.setIcon(icon);
-        this.repaint();
     }
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                login ventana = new login();
-                ventana.setVisible(true);
-                ventana.SetImageLabel(ventana.jLabel4, "src/Resources/logo_GROUP SOFTPLEX.png");
-            }
-        });
-
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new login().setVisible(true));
     }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPasswordField Contraseña;
-    private javax.swing.JTextField Usuario;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JToggleButton jToggleButton1;
-    // End of variables declaration//GEN-END:variables
 }

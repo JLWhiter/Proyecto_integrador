@@ -14,6 +14,7 @@ import reportes.FacturaPDFGenerator;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,42 +22,23 @@ import java.util.Date;
 import java.util.List;
 
 public class BoletaForm extends JFrame {
-
     private final ClienteDTO cliente;
     private BoletaDTO boleta;
     private FacturaDTO factura;
-
     private final SimpleDateFormat fFecha = new SimpleDateFormat("dd/MM/yyyy");
     private final SimpleDateFormat fHora = new SimpleDateFormat("HH:mm:ss");
 
-    private JLabel lblTitulo;
-    private JLabel lblTipo;
-    private JLabel lblMedioPago;
-    private JLabel lblCliente;
-    private JLabel lblClienteValor;
-    private JLabel lblNum;
-    private JLabel lblNumValor;
-    private JLabel lblFecha;
-    private JLabel lblFechaValor;
-    private JLabel lblHora;
-    private JLabel lblHoraValor;
-    private JLabel lblTotal;
-
-    private JComboBox<String> cmbTipo;
-    private JComboBox<String> cmbMedioPago;
-
+    private JLabel lblClienteValor, lblNumValor, lblFechaValor, lblHoraValor, lblTotal;
+    private JComboBox<String> cmbTipo, cmbMedioPago;
     private JTable tblDetalle;
     private JScrollPane scroll;
-
-    private JButton btnRegistrar;
-    private JButton btnVolver;
+    private JButton btnRegistrar, btnVolver;
 
     public BoletaForm(ClienteDTO cliente) {
         this.cliente = cliente;
         this.boleta = null;
         this.factura = null;
         initComponents();
-        setLocationRelativeTo(null);
         cargarCarrito();
     }
 
@@ -65,19 +47,10 @@ public class BoletaForm extends JFrame {
         this.boleta = boleta;
         this.factura = null;
         initComponents();
-        setLocationRelativeTo(null);
-
         cmbTipo.setSelectedItem("Boleta");
         cmbTipo.setEnabled(false);
         cmbMedioPago.setEnabled(false);
-
-        if (boleta != null) {
-            cargarDetalle(
-                    boleta.getIdBoleta().toString(),
-                    boleta.getFechaEmision(),
-                    boleta.getVentas()
-            );
-        }
+        if (boleta != null) cargarDetalle(boleta.getIdBoleta().toString(), boleta.getFechaEmision(), boleta.getVentas());
     }
 
     public BoletaForm(ClienteDTO cliente, FacturaDTO factura) {
@@ -85,19 +58,10 @@ public class BoletaForm extends JFrame {
         this.factura = factura;
         this.boleta = null;
         initComponents();
-        setLocationRelativeTo(null);
-
         cmbTipo.setSelectedItem("Factura");
         cmbTipo.setEnabled(false);
         cmbMedioPago.setEnabled(false);
-
-        if (factura != null) {
-            cargarDetalle(
-                    factura.getIdFactura(),
-                    factura.getFechaEmision(),
-                    factura.getVentas()
-            );
-        }
+        if (factura != null) cargarDetalle(factura.getIdFactura(), factura.getFechaEmision(), factura.getVentas());
     }
 
     private void cargarCarrito() {
@@ -105,29 +69,13 @@ public class BoletaForm extends JFrame {
         lblNumValor.setText("Pendiente");
         lblFechaValor.setText(fFecha.format(new Date()));
         lblHoraValor.setText(fHora.format(new Date()));
-
-        DefaultTableModel model = new DefaultTableModel(
-                new Object[][]{},
-                new String[]{"Código", "Producto", "P. Unit.", "Cantidad", "Subtotal"}
-        ) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
+        DefaultTableModel model = new DefaultTableModel(new Object[][]{}, new String[]{"Código", "Producto", "P. Unit.", "Cantidad", "Subtotal"}) {
+            public boolean isCellEditable(int row, int column) { return false; }
         };
-
         for (ItemCarritoDTO item : Cart.getItems()) {
             ProductoDTO p = item.getProducto();
-
-            model.addRow(new Object[]{
-                p.getIdProducto(),
-                p.getNombre(),
-                String.format("S/ %.2f", p.getPrecio()),
-                item.getCantidad(),
-                String.format("S/ %.2f", item.getSubtotal())
-            });
+            model.addRow(new Object[]{p.getIdProducto(), p.getNombre(), String.format("S/ %.2f", p.getPrecio()), item.getCantidad(), String.format("S/ %.2f", item.getSubtotal())});
         }
-
         tblDetalle.setModel(model);
         lblTotal.setText(String.format("Total: S/ %.2f", Cart.getTotal()));
     }
@@ -137,35 +85,17 @@ public class BoletaForm extends JFrame {
         lblNumValor.setText(id);
         lblFechaValor.setText(fFecha.format(fecha));
         lblHoraValor.setText(fHora.format(fecha));
-
-        DefaultTableModel model = new DefaultTableModel(
-                new Object[][]{},
-                new String[]{"Código", "Producto", "P. Unit.", "Cantidad", "Subtotal"}
-        ) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
+        DefaultTableModel model = new DefaultTableModel(new Object[][]{}, new String[]{"Código", "Producto", "P. Unit.", "Cantidad", "Subtotal"}) {
+            public boolean isCellEditable(int row, int column) { return false; }
         };
-
         double total = 0;
-
         if (ventas != null) {
             for (VentaDTO v : ventas) {
                 double subtotal = v.getPrecioUnitario() * v.getCantidad();
-
-                model.addRow(new Object[]{
-                    v.getProductoId(),
-                    v.getProducto().getNombre(),
-                    String.format("S/ %.2f", v.getPrecioUnitario()),
-                    v.getCantidad(),
-                    String.format("S/ %.2f", subtotal)
-                });
-
+                model.addRow(new Object[]{v.getProductoId(), v.getProducto().getNombre(), String.format("S/ %.2f", v.getPrecioUnitario()), v.getCantidad(), String.format("S/ %.2f", subtotal)});
                 total += subtotal;
             }
         }
-
         tblDetalle.setModel(model);
         lblTotal.setText(String.format("Total: S/ %.2f", total));
     }
@@ -364,137 +294,68 @@ public class BoletaForm extends JFrame {
         new CarritoForm(cliente).setVisible(true);
     }
 
+
     private void initComponents() {
-        lblTitulo = new JLabel("Generar Comprobante", SwingConstants.CENTER);
-        lblTitulo.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 20));
+        VistaTheme.prepararFrame(this, "Boleta y factura", 980, 650);
+        JPanel root = VistaTheme.fondo();
+        root.setLayout(new BorderLayout(18, 18));
 
-        lblTipo = new JLabel("Tipo de comprobante:");
-        cmbTipo = new JComboBox<>(new String[]{"Boleta", "Factura"});
+        JPanel header = VistaTheme.card();
+        header.setLayout(new BorderLayout(15, 5));
+        JPanel textos = new JPanel(new GridLayout(2,1));
+        textos.setBackground(Color.WHITE);
+        textos.add(VistaTheme.titulo("Generar comprobante"));
+        textos.add(VistaTheme.subtitulo("Selecciona el tipo de documento y medio de pago"));
+        header.add(textos, BorderLayout.CENTER);
+        lblTotal = VistaTheme.titulo("Total: S/ 0.00");
+        header.add(lblTotal, BorderLayout.EAST);
+        root.add(header, BorderLayout.NORTH);
 
-        lblMedioPago = new JLabel("Medio de pago:");
-        cmbMedioPago = new JComboBox<>(new String[]{
-            "Efectivo",
-            "Tarjeta de crédito",
-            "Tarjeta de débito",
-            "Yape",
-            "Plin",
-            "Transferencia",
-            "Pago contra entrega",
-            "Billetera digital",
-            "Visa",
-            "Mastercard",
-            "American Express",
-            "Depósito",
-            "Crédito empresarial",
-            "Pago mixto",
-            "PayPal"
-        });
+        JPanel datos = VistaTheme.card();
+        datos.setLayout(new GridBagLayout());
+        GridBagConstraints g = new GridBagConstraints();
+        g.insets = new Insets(7, 10, 7, 10);
+        g.anchor = GridBagConstraints.WEST;
+        cmbTipo = VistaTheme.combo(new String[]{"Boleta", "Factura"});
+        cmbMedioPago = VistaTheme.combo(new String[]{"Efectivo", "Yape", "Plin", "Tarjeta", "Transferencia"});
+        lblClienteValor = VistaTheme.etiqueta("—");
+        lblNumValor = VistaTheme.etiqueta("Pendiente");
+        lblFechaValor = VistaTheme.titulo("--/--/----");
+        lblHoraValor = VistaTheme.titulo("--:--:--");
+        addDato(datos, g, 0, 0, "Tipo de comprobante", cmbTipo);
+        addDato(datos, g, 1, 0, "Medio de pago", cmbMedioPago);
+        addDato(datos, g, 0, 1, "Cliente", lblClienteValor);
+        addDato(datos, g, 1, 1, "Número", lblNumValor);
+        addDato(datos, g, 0, 2, "Fecha", lblFechaValor);
+        addDato(datos, g, 1, 2, "Hora", lblHoraValor);
+        root.add(datos, BorderLayout.WEST);
 
-        lblCliente = new JLabel("Cliente:");
-        lblClienteValor = new JLabel("—");
+        tblDetalle = VistaTheme.tabla();
+        scroll = VistaTheme.scroll(tblDetalle);
+        root.add(scroll, BorderLayout.CENTER);
 
-        lblNum = new JLabel("Número:");
-        lblNumValor = new JLabel("Pendiente");
-
-        lblFecha = new JLabel("Fecha:");
-        lblFechaValor = new JLabel("--/--/----");
-
-        lblHora = new JLabel("Hora:");
-        lblHoraValor = new JLabel("--:--:--");
-
-        lblTotal = new JLabel("Total: S/ 0.00", SwingConstants.RIGHT);
-        lblTotal.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 15));
-
-        tblDetalle = new JTable();
-        scroll = new JScrollPane(tblDetalle);
-
-        btnRegistrar = new JButton("Registrar y guardar PDF");
-        btnVolver = new JButton("Volver");
+        JPanel acciones = VistaTheme.card();
+        acciones.setLayout(new FlowLayout(FlowLayout.RIGHT, 12, 0));
+        btnVolver = VistaTheme.botonSecundario("Volver");
+        btnRegistrar = VistaTheme.boton("Registrar y guardar PDF");
+        acciones.add(btnVolver);
+        acciones.add(btnRegistrar);
+        root.add(acciones, BorderLayout.SOUTH);
 
         btnRegistrar.addActionListener(e -> registrarComprobante());
         btnVolver.addActionListener(e -> volver());
+        setContentPane(root);
+    }
 
-        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Boleta o Factura");
-
-        GroupLayout layout = new GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(lblTitulo, GroupLayout.DEFAULT_SIZE, 620, Short.MAX_VALUE)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                        .addComponent(lblTipo)
-                                                        .addComponent(lblMedioPago)
-                                                        .addComponent(lblCliente)
-                                                        .addComponent(lblNum)
-                                                        .addComponent(lblFecha)
-                                                        .addComponent(lblHora))
-                                                .addGap(20, 20, 20)
-                                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                                                        .addComponent(cmbTipo, 0, 230, Short.MAX_VALUE)
-                                                        .addComponent(cmbMedioPago, 0, 230, Short.MAX_VALUE)
-                                                        .addComponent(lblClienteValor, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                        .addComponent(lblNumValor, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                        .addComponent(lblFechaValor, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                        .addComponent(lblHoraValor, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                                .addGap(0, 0, Short.MAX_VALUE))
-                                        .addComponent(scroll)
-                                        .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                                .addGap(0, 0, Short.MAX_VALUE)
-                                                .addComponent(lblTotal, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                                .addGap(0, 0, Short.MAX_VALUE)
-                                                .addComponent(btnVolver)
-                                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(btnRegistrar)))
-                                .addContainerGap())
-        );
-
-        layout.setVerticalGroup(
-                layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(lblTitulo)
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lblTipo)
-                                        .addComponent(cmbTipo, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lblMedioPago)
-                                        .addComponent(cmbMedioPago, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lblCliente)
-                                        .addComponent(lblClienteValor))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lblNum)
-                                        .addComponent(lblNumValor))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lblFecha)
-                                        .addComponent(lblFechaValor))
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lblHora)
-                                        .addComponent(lblHoraValor))
-                                .addGap(18, 18, 18)
-                                .addComponent(scroll, GroupLayout.PREFERRED_SIZE, 190, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(lblTotal)
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(btnVolver)
-                                        .addComponent(btnRegistrar))
-                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        pack();
+    private void addDato(JPanel p, GridBagConstraints g, int x, int y, String label, JComponent comp) {
+        g.gridx = x * 2;
+        g.gridy = y;
+        g.weightx = 0;
+        g.fill = GridBagConstraints.NONE;
+        p.add(VistaTheme.etiqueta(label + ":"), g);
+        g.gridx = x * 2 + 1;
+        g.weightx = 1;
+        g.fill = GridBagConstraints.HORIZONTAL;
+        p.add(comp, g);
     }
 }

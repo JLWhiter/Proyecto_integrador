@@ -3,22 +3,8 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/ModeloDTO/VentaDTO.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/Vistas/CarritoForm.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/Vistas/CatalogoForm.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/Vistas/HistorialCompras.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/Vistas/BoletaForm.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/reportes/BoletaPDFGenerator.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/reportes/FacturaPDFGenerator.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/ModeloDAO/ProductoDAO.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/Modelo/Cart.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/Vistas/Register.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/Vistas/login.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/Modelo/ProductoDigital.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/ModeloDTO/ProductoDTO.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/ModeloDAO/BoletaDAO.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/ModeloDAO/ClienteDAO.java</file>
-            <file>file:/home/jose/NetBeansProjects/Proyecto_integrador/src/ModeloDAO/FacturaDAO.java</file>
+            <file>file:/C:/Users/joseb/OneDrive/Documentos/NetBeansProjects/Proyecto_integrador/src/Vistas/CarritoForm.java</file>
+            <file>file:/C:/Users/joseb/OneDrive/Documentos/NetBeansProjects/Proyecto_integrador/src/Vistas/BoletaForm.java</file>
         </group>
     </open-files>
 </project-private>

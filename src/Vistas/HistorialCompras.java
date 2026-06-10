@@ -1,148 +1,68 @@
 package Vistas;
 
-import ModeloDTO.*;
-import ModeloDAO.*;
-
+import Config.Conexion;
+import ModeloDTO.ClienteDTO;
+import java.awt.*;
+import java.sql.*;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.JOptionPane;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 
-public class HistorialCompras extends javax.swing.JFrame {
+public class HistorialCompras extends JFrame {
+    private ClienteDTO cliente;
+    private JTable tabla;
+    private JLabel lblTotal;
 
-    private ClienteDTO clienteLogueado;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
-    /* ---------- CONSTRUCTORES ---------- */
     public HistorialCompras(ClienteDTO cliente) {
-        this.clienteLogueado = cliente;
+        this.cliente = cliente;
         initComponents();
-        setLocationRelativeTo(null);
-
-        if (clienteLogueado != null) {
-            lblTitulo.setText("Historial de Compras de "
-                    + clienteLogueado.getNombre() + " "
-                    + clienteLogueado.getApellido());
-            cargarDatosHistorial();
-        } else {
-            lblTitulo.setText("Historial de Compras (Cliente no especificado)");
-            jTableHistorial.setModel(new DefaultTableModel()); // tabla vacía
-        }
+        cargarHistorial();
     }
 
-    /* Constructor sin cliente (opcional) */
-    public HistorialCompras() {
-        initComponents();
-        setLocationRelativeTo(null);
-        lblTitulo.setText("Historial de Compras");
-        jTableHistorial.setModel(new DefaultTableModel()); // tabla vacía
-    }
-
-    /* ---------- CARGA DATOS ---------- */
-    private void cargarDatosHistorial() {
-
-        DefaultTableModel modelo = new DefaultTableModel() {
-
-            @Override
-            public boolean isCellEditable(int r, int c) {
-                return false;
-            }
-        };
-
-        modelo.setColumnIdentifiers(new String[]{
-            "ID Venta",
-            "Fecha",
-            "Documento",
-            "Producto",
-            "Cantidad",
-            "Precio",
-            "Subtotal"
-        });
-
-        try {
-
-            BoletaDAO boletaDAO = new BoletaDAO();
-
-            ArrayList<Object[]> lista
-                    = boletaDAO.obtenerHistorialCompras(
-                            clienteLogueado.getIdCliente()
-                    );
-
-            for (Object[] fila : lista) {
-                modelo.addRow(fila);
-            }
-
-            jTableHistorial.setModel(modelo);
-
-        } catch (Exception e) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Error cargando historial: " + e.getMessage()
-            );
-        }
-    }
-
-    /* ---------- UI ---------- */
-    @SuppressWarnings("unchecked")
     private void initComponents() {
+        VistaTheme.prepararFrame(this, "Historial de compras", 980, 620);
+        JPanel root = VistaTheme.fondo(); root.setLayout(new BorderLayout(18, 18));
+        JPanel header = VistaTheme.card(); header.setLayout(new BorderLayout(14, 5));
+        JPanel textos = new JPanel(new GridLayout(2,1)); textos.setBackground(Color.WHITE);
+        textos.add(VistaTheme.titulo("Historial de compras"));
+        textos.add(VistaTheme.subtitulo("Cliente: " + (cliente != null ? cliente.getNombre() + " " + cliente.getApellido() : "No identificado")));
+        header.add(textos, BorderLayout.CENTER);
+        lblTotal = VistaTheme.etiqueta("Total registros: 0"); header.add(lblTotal, BorderLayout.EAST);
+        root.add(header, BorderLayout.NORTH);
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTableHistorial = new javax.swing.JTable();
-        btnVolver = new javax.swing.JButton();
-        lblTitulo = new javax.swing.JLabel();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-
-        jTableHistorial.setModel(new DefaultTableModel());
-        jScrollPane1.setViewportView(jTableHistorial);
-
-        btnVolver.setText("Volver al Menú");
-        btnVolver.addActionListener(evt -> {
-            new Menu(clienteLogueado).setVisible(true);
-            dispose();
-        });
-
-        lblTitulo.setFont(new java.awt.Font("Segoe UI", 1, 18));
-        lblTitulo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblTitulo.setText("Historial de Compras");
-
-        javax.swing.GroupLayout layout
-                = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addGap(20)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 680, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGroup(layout.createSequentialGroup()
-                                                .addComponent(btnVolver)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(lblTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addContainerGap(20, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addGap(15)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(btnVolver)
-                                        .addComponent(lblTitulo))
-                                .addGap(10)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 320,
-                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(20, Short.MAX_VALUE))
-        );
-        pack();
+        tabla = VistaTheme.tabla();
+        root.add(VistaTheme.scroll(tabla), BorderLayout.CENTER);
+        JButton volver = VistaTheme.botonSecundario("Volver al menú");
+        JPanel footer = VistaTheme.card(); footer.setLayout(new FlowLayout(FlowLayout.RIGHT)); footer.add(volver);
+        volver.addActionListener(e -> { new Menu(cliente).setVisible(true); dispose(); });
+        root.add(footer, BorderLayout.SOUTH);
+        setContentPane(root);
     }
 
-    public static void main(String[] args) {
-        java.awt.EventQueue.invokeLater(() -> new HistorialCompras().setVisible(true));
+    private void cargarHistorial() {
+        DefaultTableModel model = new DefaultTableModel(new String[]{"ID Venta", "Fecha", "Documento", "Producto", "Cantidad", "Precio", "Subtotal"}, 0) {
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+        if (cliente == null) { tabla.setModel(model); return; }
+        String sql = """
+            SELECT v.id_venta, v.fecha_emision, COALESCE(td.nombre, v.id_tipo_documento) documento,
+                   p.nombre producto, dv.cantidad, dv.precio_unitario, dv.subtotal
+            FROM venta v
+            INNER JOIN detalle_venta dv ON v.id_venta = dv.id_venta
+            INNER JOIN producto p ON dv.id_producto = p.id_producto
+            LEFT JOIN tipo_documento td ON v.id_tipo_documento = td.id_documento
+            WHERE v.id_persona = ?
+            ORDER BY v.fecha_emision DESC
+        """;
+        try (Connection con = new Conexion().getConexion(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, cliente.getIdCliente());
+            ResultSet rs = ps.executeQuery();
+            int c = 0;
+            while (rs.next()) {
+                c++;
+                model.addRow(new Object[]{rs.getString("id_venta"), rs.getTimestamp("fecha_emision"), rs.getString("documento"), rs.getString("producto"), rs.getInt("cantidad"), String.format("S/ %.2f", rs.getDouble("precio_unitario")), String.format("S/ %.2f", rs.getDouble("subtotal"))});
+            }
+            lblTotal.setText("Total registros: " + c);
+        } catch (Exception e) { JOptionPane.showMessageDialog(this, "Error al cargar historial: " + e.getMessage()); }
+        tabla.setModel(model);
     }
-
-    private javax.swing.JButton btnVolver;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTableHistorial;
-    private javax.swing.JLabel lblTitulo;
 }
