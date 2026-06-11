@@ -111,7 +111,7 @@ public class Cart {
             items.remove(index);
             recalcularTotal();
         } else {
-            System.err.println("Índice fuera de rango al intentar eliminar del carrito.");
+            System.err.println("Indice fuera de rango al intentar eliminar del carrito.");
         }
     }
 
