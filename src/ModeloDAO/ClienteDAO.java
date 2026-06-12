@@ -40,10 +40,9 @@ public class ClienteDAO implements ClienteInterface {
     public boolean agregar(ClienteDTO cliente) {
 
         String sql = "INSERT INTO cliente (id_cliente, nombre, apellido, telefono, contrasena, correo) "
-                   + "VALUES (?, ?, ?, ?, ?, ?)";
+                + "VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = con.getConexion();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = con.getConexion(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             String hash = hashSHA256(SALT + cliente.getPassword());
 
@@ -73,11 +72,10 @@ public class ClienteDAO implements ClienteInterface {
         ClienteDTO c = null;
 
         String sql = "SELECT id_cliente, nombre, apellido, telefono, correo "
-                   + "FROM cliente "
-                   + "WHERE id_cliente = ? AND contrasena = ?";
+                + "FROM cliente "
+                + "WHERE id_cliente = ? AND contrasena = ?";
 
-        try (Connection conn = con.getConexion();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = con.getConexion(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             String hash = hashSHA256(SALT + password);
 
@@ -106,16 +104,16 @@ public class ClienteDAO implements ClienteInterface {
 // =========================
 // LISTAR UNO
 // =========================
+
     @Override
     public ClienteDTO listarUno(String id) {
 
         ClienteDTO c = null;
 
         String sql = "SELECT id_cliente, nombre, apellido, telefono, correo "
-                   + "FROM cliente WHERE id_cliente = ?";
+                + "FROM cliente WHERE id_cliente = ?";
 
-        try (Connection conn = con.getConexion();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = con.getConexion(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, id);
 
@@ -138,6 +136,7 @@ public class ClienteDAO implements ClienteInterface {
 
         return c;
     }
+
     // =========================
     // LISTAR TODOS
     // =========================
@@ -148,9 +147,7 @@ public class ClienteDAO implements ClienteInterface {
 
         String sql = "SELECT id_cliente, nombre, apellido, telefono, correo FROM cliente";
 
-        try (Connection conn = con.getConexion();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = con.getConexion(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 ClienteDTO c = new ClienteDTO();
@@ -170,5 +167,25 @@ public class ClienteDAO implements ClienteInterface {
         }
 
         return lista;
+    }
+
+    public int obtenerTotalClientes() {
+
+        String sql = "SELECT COUNT(*) AS total FROM cliente";
+
+        try (
+                Connection conn = con.getConexion(); 
+                PreparedStatement ps = conn.prepareStatement(sql); 
+                ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error obtener total clientes: " + e);
+        }
+
+        return 0;
     }
 }

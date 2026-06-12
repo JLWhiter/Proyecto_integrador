@@ -82,35 +82,51 @@ public class ProductoDAO {
 
         return producto;
     }
+
     public ArrayList<ProductoDTO> listarTodo() {
 
-    ArrayList<ProductoDTO> lista = new ArrayList<>();
+        ArrayList<ProductoDTO> lista = new ArrayList<>();
 
-    String sql = "SELECT * FROM producto ORDER BY nombre";
+        String sql = "SELECT * FROM producto ORDER BY nombre";
 
-    try (
-            Connection con = cn.getConexion();
-            PreparedStatement ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery()
-    ) {
+        try (
+                Connection con = cn.getConexion(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
-        while (rs.next()) {
+            while (rs.next()) {
 
-            ProductoDTO p = new ProductoDTO();
+                ProductoDTO p = new ProductoDTO();
 
-            p.setIdProducto(rs.getInt("id_producto"));
-            p.setNombre(rs.getString("nombre"));
-            p.setStock(rs.getInt("stock"));
-            p.setPrecio(rs.getDouble("precio"));
-            p.setCategoria(rs.getString("categoria"));
+                p.setIdProducto(rs.getInt("id_producto"));
+                p.setNombre(rs.getString("nombre"));
+                p.setStock(rs.getInt("stock"));
+                p.setPrecio(rs.getDouble("precio"));
+                p.setCategoria(rs.getString("categoria"));
 
-            lista.add(p);
+                lista.add(p);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error listar productos: " + e);
         }
 
-    } catch (Exception e) {
-        System.out.println("Error listar productos: " + e);
+        return lista;
     }
 
-    return lista;
-}
+    public int obtenerProductosAgotados() {
+
+        String sql = "SELECT COUNT(*) AS total FROM producto WHERE stock <= 0";
+
+        try (
+                Connection con = cn.getConexion(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error obtener productos agotados: " + e);
+        }
+
+        return 0;
+    }
 }
